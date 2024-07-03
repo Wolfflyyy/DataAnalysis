@@ -1,5 +1,6 @@
 # Python Dash App
 
+![Alt text](https://github.com/Wolfflyyy/DataAnalysis/blob/main/super.png?raw=true "Title")
 
 This is the Super Eagles's Ethical Hacking data analysis dashboard app.
 The dashboard can be opened by using either the dasheth.py or ethhack.ipynb
@@ -39,3 +40,6 @@ Openpyxl Package
 pip install openpyxl
 ```
 
+## Building
+After installing the prerequisite packages, you can run with the ".py" or ".ipynb" file.
+You should get an address for the dash web app with something like this http://127.0.0.1:.../
