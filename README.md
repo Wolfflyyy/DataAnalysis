@@ -30,11 +30,6 @@ Plotly Package
 pip install plotly
 ```
 
-Chardet Package
-```cmd
-pip install chardet
-```
-
 Openpyxl Package
 ```cmd
 pip install openpyxl
