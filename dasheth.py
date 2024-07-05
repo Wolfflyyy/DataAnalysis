@@ -1,6 +1,6 @@
 import dash
-import chardet
-from pathlib import Path
+# import chardet
+# from pathlib import Path
 from dash import Dash, html, dash_table, dcc
 from dash.dependencies import Input, Output
 import pandas as pd
