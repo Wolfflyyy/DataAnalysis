@@ -1,6 +1,4 @@
 import dash
-# import chardet
-# from pathlib import Path
 from dash import Dash, html, dash_table, dcc
 from dash.dependencies import Input, Output
 import pandas as pd
@@ -14,14 +12,33 @@ data_breaches_df = pd.read_excel(
 data_breaches_df['records lost'] = data_breaches_df['records lost'].replace(
     r'[^\d]', '', regex=True).astype(int)
 
-# Ensure that there are no spaces on the end of the values for the "Method"
+# Ensure that there are no spaces on the end of the values for the "Method" and "Sector"
 data_breaches_df['method'] = data_breaches_df['method'].str.rstrip()
-
-# Ensure that there are no spaces on the end of the values for the "Sector"
 data_breaches_df['sector'] = data_breaches_df['sector'].str.rstrip()
-
 # Ensure that there are no space on the end of "year" column
 data_breaches_df.rename(columns={'year   ': 'year'}, inplace=True)
+
+
+##
+#  This Section of the code is newly added !! Notice this
+##
+# Map data sensitivity levels
+sensitivity_mapping = {
+    1: 'Just email address/Online information',
+    2: 'SSN/Personal details',
+    3: 'Credit card information',
+    4: 'Health & other personal records',
+    5: 'Full details',
+    'No Value': np.nan  # or any other value that signifies missing data
+}
+
+# Apply mapping to create 'data sensitivity level' column
+data_breaches_df['data sensitivity level'] = data_breaches_df['data sensitivity'].map(
+    sensitivity_mapping)
+##
+#  End of changes
+##
+
 
 # Get unique values for dropdown options
 years = data_breaches_df['year'].unique()
@@ -34,6 +51,10 @@ external_stylesheets = [
     'https://codepen.io/chriddyp/pen/bWLwgP.css', './assets/styles.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+##
+#  Start of the entire HTML Segment that encompassed the whole Dashboard app. This section handles the UI and some logics
+#  related to the HTML of the web app
+##
 app.layout = html.Div([
 
     # Visualization for Data Breaches Analysis Dashboard
@@ -124,9 +145,18 @@ app.layout = html.Div([
 
 ])
 
+##
+#  The end of the HTML Segment
+##
+
+
+##
+# For better clarification this part handle the loading logic of the app,
+# by using Callbacks to update the output components (like graphs, tables, etc.)
+# based on changes or interactions with input components (like dropdowns, sliders, etc.)
+# without having to reloading the entire app
+##
 # Define the callbacks to update the graphs based on the selected analysis type
-
-
 @app.callback(
     [Output('graph-output', 'figure'), Output('top-5-graph-output', 'figure')],
     [Input('analysis-type', 'value'),
@@ -136,10 +166,18 @@ app.layout = html.Div([
      Input('method-filter', 'value'),
      Input('top-5-year-filter', 'value')]
 )
+##
+# The purpose of the update_graph callback function is to update the graphs ('figure' outputs) based on the selected filters
+# and analysis type that the user choose through various dropdowns or filters
+##
 def update_graph(selected_analysis, selected_years, selected_organisations, selected_sectors, selected_methods, selected_top5_years):
     # Filter the DataFrame based on the selected filters
     df = data_breaches_df
 
+    ##
+    #  To understand this better. Basically, what these 4 will do is to filter the DataFrame to include
+    #  only rows where the 4 columns match any of the values in the defined filters below (e.g. selected_years)
+    ##
     # Apply filters if they are not empty or None
     if selected_years:
         df = df[df['year'].isin(selected_years)]
@@ -150,10 +188,16 @@ def update_graph(selected_analysis, selected_years, selected_organisations, sele
     if selected_methods:
         df = df[df['method'].isin(selected_methods)]
 
+    ##
+    #  The fig = {} is to create an empty figure which will be used to store the plotly figure objects
+    #  that will be returned by this function
+    ##
     # Initialize fig to an empty figure
     fig = {}
 
-    # Data Visualization
+    ##
+    #  The begin of Data Visualization section
+    ##
 
     # Visualization for Sector
     if selected_analysis == 'sector':
@@ -195,16 +239,22 @@ def update_graph(selected_analysis, selected_years, selected_organisations, sele
         else:
             fig = px.bar(title='No data available for the selected filters')
 
+    ##
+    #  This part just got added with ".sort_index() and tweak to handle the newly added data sensitivity mapping"
+    ##
     # Visualization for Data Sensitivity
     elif selected_analysis == 'data_sensitivity':
-        sensitivity_counts = df['data sensitivity'].value_counts()
+        # Use the mapped 'data sensitivity level' for plotting
+        sensitivity_counts = df['data sensitivity level'].value_counts(
+        ).sort_index()
         if not sensitivity_counts.empty:
             fig = px.bar(
                 x=sensitivity_counts.index,
                 y=sensitivity_counts.values,
-                labels={'x': 'Data Sensitivity', 'y': 'Number of Breaches'},
-                title='Number of Data Breaches by Data Sensitivity',
-                color=sensitivity_counts.index,  # Color bars by data sensitivity
+                labels={'x': 'Data Sensitivity Level',
+                        'y': 'Number of Breaches'},
+                title='Number of Data Breaches by Data Sensitivity Level',
+                color=sensitivity_counts.index,  # Color bars by data sensitivity level
                 hover_data={'Data Sensitivity': sensitivity_counts.index,
                             'Number of Breaches': sensitivity_counts.values}
             )
@@ -314,6 +364,10 @@ def update_methods_donut_chart(selected_years):
     fig_donut.update_traces(textinfo='percent+label')
 
     return fig_donut
+
+##
+#  The end of the Data Visualization section including the seperated ones
+##
 
 
 if __name__ == '__main__':
