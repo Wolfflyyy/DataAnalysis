@@ -19,6 +19,11 @@ conda activate base
 
 After that, you must install a few things to run the app.
 
+Dash Package
+```cmd
+pip install dash
+```
+
 Panda Package
 ```cmd
 pip install pandas
