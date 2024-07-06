@@ -220,6 +220,11 @@ def update_graph(selected_analysis, selected_years, selected_organisations, sele
         method_counts = df['method'].value_counts()
 
         # Aggregate sector information for each method
+        ##
+        #  This lambda function takes each group of sector values (x),
+        #  gets the unique values (x.unique()),
+        #  joins them into a single string separated by commas (', '.join(...)).
+        ##
         sector_info = (
             df.groupby('method')['sector']
             .apply(lambda x: ', '.join(x.unique()))
