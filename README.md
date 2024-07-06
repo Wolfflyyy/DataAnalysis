@@ -5,6 +5,10 @@
 This is the Super Eagles's Ethical Hacking data analysis dashboard app.
 The dashboard can be opened by using either the dasheth.py or ethhack.ipynb
 
+## Presentation PDF
+
+You can find the pdf of the presentation inside the GitHub repository. It is named "Ethical Hacking Presentation"
+
 ## Installation
 
 In the console window of your visual studio code, choose "cmd" as your console and type "conda activate base".
